@@ -25,9 +25,10 @@
 
 
 **POST example:**
-
+```
 {	
     "name": "MIF",
     "city": "Vilnius",
     "phoneNumber": 80123050
 }
+```
