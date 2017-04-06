@@ -3,7 +3,7 @@
 ## 1. Build docker:
     docker build -t companies/rest:1 .
 
-## 2. Run coker:
+## 2. Run docker:
     docker run -d -p 80:80 companies/rest:1
     
 ## 3. Now you can access web service with /companies
@@ -22,7 +22,6 @@
 ## PUT:
     /companies/:id                  -   update company, with id parameter.
     
-
 
 **POST example:**
 ```
