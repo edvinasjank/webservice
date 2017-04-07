@@ -1,5 +1,8 @@
 # How to run:
 
+## Run from hub.docker.com:
+    docker run -d -p 80:80 zenka/webservice:1
+
 ## 1. Build docker:
     docker build -t companies/rest:1 .
 
