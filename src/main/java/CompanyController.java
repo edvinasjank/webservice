@@ -113,9 +113,47 @@ public class CompanyController {
         }
     }
      public static Object createCompany(Request request, Response response, CompaniesEditor compEdit){
-        Company company = fromJson(request.body(), Company.class);
-        compEdit.create(company);
-        return "OK";
+        System.out.println( request.body());
+        int numberCount = 0;
+        String temp = request.body();
+        for(int i = 0; i < temp.length(); i++){
+            if(temp.charAt(i) == 'p' && temp.charAt(i+1) == 'h' && temp.charAt(i+2) == 'o' && temp.charAt(i+3) == 'n' &&
+                    temp.charAt(i+4) == 'e' &&
+                    temp.charAt(i+5) == 'N' &&
+                    temp.charAt(i+6) == 'u' &&
+                    temp.charAt(i+7) == 'm' &&
+                    temp.charAt(i+8) == 'b' &&
+                    temp.charAt(i+9) == 'e' &&
+                    temp.charAt(i+10) == 'r' 
+                    ){
+               
+                for(int j = i+13; j < i + 25; j++){
+                        if(temp.charAt(j) == '0' || temp.charAt(j) == '1' ||temp.charAt(j) == '2' ||temp.charAt(j) =='3' ||temp.charAt(j) == '4' ||
+                                temp.charAt(j) == '5' ||temp.charAt(j) == '6' ||temp.charAt(j) == '7' || temp.charAt(j) == '8' || temp.charAt(j) == '9'){
+                                numberCount++;
+                        }
+                        
+                }
+            }
+        }
+       if(numberCount == 9){
+            Company company = fromJson(request.body(), Company.class);
+            try{
+                if(isAlpha(company.getCity()) && company.getPhoneNumber()<870000000 
+                        && company.getPhoneNumber() >= 860000000){
+                    compEdit.create(company);
+                return company; 
+                }
+                else return "Error with data input!";
+
+            }
+            catch(Exception e){
+                return e.getMessage();
+            }
+        } 
+       else{
+           return "Error with data input!";
+       }
 
     }
     public static Object updateCompany(Request request, Response response, CompaniesEditor compEdit){
@@ -137,6 +175,15 @@ public class CompanyController {
     
      public static <T extends Object> T  fromJson(String json, Class<T> classe) {
        Gson gson = new Gson();
+       gson.fromJson(json, classe);
         return gson.fromJson(json, classe);
     }
+     public static String toJson(Object value){
+         Gson gson = new Gson();
+        String json = gson.toJson(value);
+        return json;
+     }
+     public static boolean isAlpha(String name) {
+         return name.matches("[a-zA-Z]+");
+    }   
 }
