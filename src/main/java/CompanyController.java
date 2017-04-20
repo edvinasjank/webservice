@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import spark.Request;
 import spark.Response;
+import static spark.utils.StringUtils.isEmpty;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -24,9 +25,14 @@ public class CompanyController {
            int id = Integer.valueOf(request.params("id"));
            Company company = compEdit.get(id);
            if(company != null){
+               System.out.println("if");
+         //      throw new Exception("pries return404. Failed to find company by id: " + id + "!");
                return company;
            }
            else{
+               System.out.println("else");
+              response.status(404);
+              System.out.println("sss");
                throw new Exception("404. Failed to find company by id: " + id + "!");
            }
 
@@ -44,6 +50,7 @@ public class CompanyController {
                 return companies;
             }
             else{
+                response.status(404);
                 throw new Exception("404. Failed to find company by city: " + city + "!");
             }
             
@@ -60,6 +67,7 @@ public class CompanyController {
                 return companies;
             }
             else{
+                response.status(404);
                 throw new Exception("404. Failed to find company by name: " + name + "!");
             }
             
@@ -75,6 +83,7 @@ public class CompanyController {
                 return "Total companies in " + city + ": " + count;
             }
             else{
+                response.status(404);
                 throw new Exception("404. There is no companies in city: " + city);
             }
         }
@@ -90,6 +99,7 @@ public class CompanyController {
                 return "Total companies in " + name + ": " + count;
             }
             else{
+                response.status(404);
                 throw new Exception("404. There is no companies with name: " + name);
             }
         }
@@ -105,6 +115,7 @@ public class CompanyController {
                  return "Company with ID: " + id + "  successfully deleted!";  
             }
             else{
+                response.status(404);
                 throw new Exception("404. There is no company with id: " + id + "!");
             }    
         }
@@ -112,11 +123,34 @@ public class CompanyController {
             return e.getMessage();
         }
     }
-     public static Object createCompany(Request request, Response response, CompaniesEditor compEdit){
+     public static Object createCompany(Request request, Response response, CompaniesEditor compEdit) {
         System.out.println( request.body());
+        int id = Integer.valueOf(request.params("id"));
+        try{     
         int numberCount = 0;
-        String temp = request.body();
-        for(int i = 0; i < temp.length(); i++){
+       
+           if(compEdit.companies.containsKey(id)){
+                 response.status(400);
+                throw new Exception("The company already exist with id: " + id + "!");
+            }
+       }catch(Exception e){
+            return e.getMessage();
+        }
+        try{
+            String temp = request.body();
+            if("".equals(temp)){
+                response.status(400);
+                throw new Exception("400. Invalid input");
+            }
+        Company company = fromJson(request.body(), Company.class);
+        compEdit.create(company,id);
+                return company; 
+        }
+       catch(Exception e){
+           response.status(400);
+            return e.getMessage();
+       }
+        /*for(int i = 0; i < temp.length(); i++){
             if(temp.charAt(i) == 'p' && temp.charAt(i+1) == 'h' && temp.charAt(i+2) == 'o' && temp.charAt(i+3) == 'n' &&
                     temp.charAt(i+4) == 'e' &&
                     temp.charAt(i+5) == 'N' &&
@@ -127,7 +161,7 @@ public class CompanyController {
                     temp.charAt(i+10) == 'r' 
                     ){
                
-                for(int j = i+13; j < i + 25; j++){
+                for(int j = i+13; j < temp.length(); j++){
                         if(temp.charAt(j) == '0' || temp.charAt(j) == '1' ||temp.charAt(j) == '2' ||temp.charAt(j) =='3' ||temp.charAt(j) == '4' ||
                                 temp.charAt(j) == '5' ||temp.charAt(j) == '6' ||temp.charAt(j) == '7' || temp.charAt(j) == '8' || temp.charAt(j) == '9'){
                                 numberCount++;
@@ -137,38 +171,91 @@ public class CompanyController {
             }
         }
        if(numberCount == 9){
-            Company company = fromJson(request.body(), Company.class);
+            
             try{
                 if(isAlpha(company.getCity()) && company.getPhoneNumber()<870000000 
                         && company.getPhoneNumber() >= 860000000){
-                    compEdit.create(company);
+                    compEdit.create(company,id);
                 return company; 
                 }
-                else return "Error with data input!";
-
+                else {response.status(400);
+                    return "Error with data input!";
+                }
+                
             }
             catch(Exception e){
                 return e.getMessage();
             }
         } 
        else{
+           response.status(400);
            return "Error with data input!";
-       }
+       }*/
 
     }
-    public static Object updateCompany(Request request, Response response, CompaniesEditor compEdit){
+    public static Object updateCompany(Request request, Response response, CompaniesEditor compEdit) throws Exception{
         int id = Integer.valueOf(request.params("id"));
         Company company = fromJson(request.body(), Company.class);
+        System.out.println(company);
+        System.out.println(company.getName());
+        try{
+            if(isEmpty(request.body())){
+                response.status(400);
+                throw new Exception("400. Empty body");
+            }
+        } catch(Exception e){
+            return e.getMessage();
+        }
         try{ 
             if(compEdit.get(id) != null){
                 compEdit.update(id, company);
                  return "Company with ID: " + id + "  successfully updated!";  
             }
             else{
+                response.status(404);
                 throw new Exception("404. There is no company with id: " + id + "!");
             }    
         }
         catch(Exception e){
+            return e.getMessage();
+        }
+    } 
+     public static Object patchCompany(Request request, Response response, CompaniesEditor compEdit) throws Exception{
+        int id = Integer.valueOf(request.params("id"));
+        try{ 
+        Company company = fromJson(request.body(), Company.class);
+        if(isEmpty(request.body())){
+            response.status(400);
+            throw new Exception("400. Empty body");
+        }
+            if(compEdit.get(id) != null){
+                 if(company.getName() == null || company.getCity() == null || company.getPhoneNumber() == 0){
+                     response.status(400); 
+                     throw new Exception("There is no required field in ur json");
+                  }
+                if(company.getName() == null){
+                    company.setName(compEdit.get(id).getName());
+                }
+                 if(company.getCity() == null){
+                    company.setCity(compEdit.get(id).getCity());
+                }
+                  if(company.getPhoneNumber() == 0){
+                    company.setPhoneNumber(compEdit.get(id).getPhoneNumber());
+                }
+                 
+                  else{
+                       compEdit.update(id, company);
+                  }
+                
+                 return "Company with ID: " + id + "  successfully updated!";  
+            }
+            else{
+                response.status(404);
+                throw new Exception("404. There is no company with id: " + id + "!");
+            }    
+        }
+        catch(Exception e){
+          
             return e.getMessage();
         }
     } 
@@ -177,11 +264,16 @@ public class CompanyController {
        Gson gson = new Gson();
        gson.fromJson(json, classe);
         return gson.fromJson(json, classe);
+         
     }
      public static String toJson(Object value){
-         Gson gson = new Gson();
-        String json = gson.toJson(value);
-        return json;
+         
+            Gson gson = new Gson();
+           String json = gson.toJson(value);
+           return json; 
+        
+        
+         
      }
      public static boolean isAlpha(String name) {
          return name.matches("[a-zA-Z]+");

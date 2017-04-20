@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /*
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
  */
 public class CompaniesEditor {
    public Map<Integer, Company> companies = new HashMap();
+   Map<Integer, Company> treeMap;
+
     
     public CompaniesEditor(){
         Company temp = new Company(1,"Maxima", "Vilnius", 86511234);
@@ -43,14 +46,15 @@ public class CompaniesEditor {
         return this.companies.get(id);
     }
     public List<Company> getAll(){
-       return companies.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList());
+       
+       return new TreeMap<Integer, Company>(companies).entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toList());
     }
     public void delete(int id){
         this.companies.remove(id);
     }
-    public void create(Company company){
-       company.setId(companies.size() +1);
-       this.companies.put(companies.size()+1, company);
+    public void create(Company company, int id){
+        company.setId(id);
+       this.companies.put(id, company);
     }
     public void update(int id, Company company){
         company.setId(id);

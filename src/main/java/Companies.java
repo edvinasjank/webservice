@@ -40,13 +40,15 @@ public class Companies {
             delete("/:id", (request, response) -> {
                     return toJson(CompanyController.deleteById(request, response, compEdit));
                 } );
-            post("", (request, response) -> {
+            post("/:id", (request, response) -> {
                     return toJson(CompanyController.createCompany(request, response, compEdit));
                 } );
             put("/:id", (request, response) -> {
                     return toJson(CompanyController.updateCompany(request, response, compEdit));
                 } );
-           
+            patch("/:id", (request, response) -> {
+                    return toJson(CompanyController.patchCompany(request, response, compEdit));
+                } );
  
         }); 
          after((request, response) -> response.type("application/json")); 
