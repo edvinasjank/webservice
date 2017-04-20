@@ -21,16 +21,17 @@
 ## DELETE:    
     /companies/:id                  -   delete company, with id parameter.
 ## POST:
-    /companies                      -   post new company.
+    /companies/:id                  -   post new company, with id parameter.
 ## PUT:
-    /companies/:id                  -   update company, with id parameter.
-    
+    /companies/:id                  -   update all object, with id parameter.
+## PATCH:
+    /companies/:id                  -   update object field's, with id parameter.    
 
 **POST example:**
 ```
 {	
     "name": "MIF",
     "city": "Vilnius",
-    "phoneNumber": 80123050
+    "phoneNumber": 864123050
 }
 ```
