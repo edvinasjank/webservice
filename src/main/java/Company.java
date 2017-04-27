@@ -13,15 +13,20 @@ import lombok.Data;
  */
 @Data
 public class Company {
-    private int id;
+      private int id;
     private String name;
     private String city;
     private int phoneNumber;
-    public Company(int id, String name, String city, int phoneNumber){
+    private int ownerId;
+    public Company(int id, String name, String city, int phoneNumber, int ownerId){
         this.id = id;
         this.name = name;
         this.city = city;
         this.phoneNumber = phoneNumber;
+        this.ownerId = ownerId;
+    }
+    Company(){
+        
     }
     public String getName(){
         return this.name;

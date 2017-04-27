@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  company:
+    image: "zenka/webservice:2"
+    ports:
+      - 80:80
+  owner:
+    image: "eima1995/people:1"
+    ports:
+      - 5002:4321
+    depends_on:
+      - company

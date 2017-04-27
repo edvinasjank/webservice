@@ -1,11 +1,18 @@
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import spark.Request;
 import spark.Response;
 import static spark.utils.StringUtils.isEmpty;
-
+import java.net.URL;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -21,18 +28,48 @@ public class CompanyController {
         return compEdit.getAll();
     }
     public static Object getCompanyById(Request request, Response response, CompaniesEditor compEdit){
+        HttpURLConnection con = null;
         try{
            int id = Integer.valueOf(request.params("id"));
            Company company = compEdit.get(id);
+           
            if(company != null){
-               System.out.println("if");
-         //      throw new Exception("pries return404. Failed to find company by id: " + id + "!");
-               return company;
+             FinalJson json = new FinalJson();
+                  String otherService = "";
+                  int ownerId = company.getOwnerId();
+       String url = "http://192.168.99.100:5002/people/" + ownerId ;
+		URL obj = new URL(url);
+		con = (HttpURLConnection) obj.openConnection();
+		con.setRequestMethod("GET");
+		BufferedReader in = new BufferedReader(
+		        new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer response1 = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {
+			response1.append(inputLine);
+		}
+		in.close(); 
+                otherService = response1.toString();
+		
+		JsonObject jsonObject = new JsonParser().parse(otherService).getAsJsonObject();
+        String ownerName = jsonObject.get("name").getAsString();
+        String ownerSurname =  jsonObject.get("surname").getAsString();
+        String ownerGender = jsonObject.get("gender").getAsString();
+        String ownerAddress = jsonObject.get("address").getAsString();
+        json.id = company.getId();
+       json.city = company.getCity();
+       json.name = company.getName();
+       json.ownerAddress = ownerAddress;
+       json.ownerGender = ownerGender;
+       json.ownerName = ownerName ;
+       json.ownerSurname =  ownerSurname;
+       json.phoneNumber = company.getPhoneNumber();
+        
+               return json;
            }
            else{
-               System.out.println("else");
               response.status(404);
-              System.out.println("sss");
                throw new Exception("404. Failed to find company by id: " + id + "!");
            }
 
@@ -40,6 +77,12 @@ public class CompanyController {
        catch(Exception e){
            return e.getMessage();
        }
+        finally{
+            
+            if(con != null){
+                con.disconnect();
+            }
+        }
     }
     public static Object getCompaniesByCity(Request request, Response response, CompaniesEditor compEdit){
         try{
@@ -109,9 +152,34 @@ public class CompanyController {
     }
     public static Object deleteById(Request request, Response response, CompaniesEditor compEdit){
         int id = Integer.valueOf(request.params("id"));
+        HttpURLConnection con = null;
+        URL obj = null;
+        Company company = compEdit.get(id);
+       
         try{
-            if(compEdit.get(id) != null){
+            if(company != null){
+                 
+                int ownerId = company.getOwnerId();
+                try {
+                   obj = new URL("http://192.168.99.100:5002/people/"  + ownerId);  
+                  } catch (MalformedURLException exception) {
+                       exception.printStackTrace();
+                  }              
+                System.out.println("33333");
+                
+                con = (HttpURLConnection) obj.openConnection();
+                System.out.println("12563");
+                 con.setRequestProperty("Content-Type",
+                "application/x-www-form-urlencoded");
+                 //System.out.println(con.getResponseCode());
+                
+                System.out.println("000");
+                 
+		con.setRequestMethod("DELETE");
+                con.getResponseCode();
+                System.out.println("44444");
                 compEdit.delete(id);
+                System.out.println("55555");
                  return "Company with ID: " + id + "  successfully deleted!";  
             }
             else{
@@ -122,24 +190,62 @@ public class CompanyController {
         catch(Exception e){
             return e.getMessage();
         }
+        finally {         
+                 if (con != null) {
+                     con.disconnect();
+                     System.out.println("9999999");
+                }
+        }
     }
+    
      public static Object createCompany(Request request, Response response, CompaniesEditor compEdit) {
         System.out.println( request.body());
-       // int id = Integer.valueOf(request.params("id"));
-             
-        int numberCount = 0;
-       
-          
+        HttpURLConnection con = null;
         try{
             String temp = request.body();
             if("".equals(temp)){
                 response.status(400);
                 throw new Exception("400. Invalid input");
             }
-        Company company = fromJson(request.body(), Company.class);
-      
-        compEdit.create(company);
-          response.header("PATH", "companies/" + company.getId());
+                Company company = new Company();
+                FinalJson jsonTemp = fromJson(request.body(), FinalJson.class);
+                company.setCity(jsonTemp.city);
+                company.setName(jsonTemp.name);
+                company.setPhoneNumber(jsonTemp.phoneNumber); 
+                response.header("PATH", "companies/" + company.getId());
+                compEdit.create(company);
+                System.out.println("Haasas");
+                String url = "http://192.168.99.100:5002/people" ;
+		URL obj = new URL(url);
+		con = (HttpURLConnection) obj.openConnection();
+		con.setRequestMethod("POST");
+		String requestString = " { \"name\": " + "\""+jsonTemp.ownerName +"\""+  ", ";
+                requestString += "\"surname\": " + "\"" +jsonTemp.ownerSurname+ "\"" + ", "; 
+                requestString += "\"gender\": " + "\"" + jsonTemp.ownerGender + "\"" +", ";
+                requestString += "\"address\": " + "\""+ jsonTemp.ownerAddress +"\""+ "}";
+                System.out.println(requestString);
+                 con.setDoOutput(true);
+		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+		wr.writeBytes(requestString);
+		wr.flush();
+		wr.close();
+            //int responseCode = con.getResponseCode();
+            BufferedReader in = new BufferedReader(
+		        new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer response2 = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {
+			response2.append(inputLine);
+		}
+		in.close();
+
+		//print result
+                System.out.println(request.body());
+		
+                System.out.println("hellooo");
+                System.out.println(response2.toString());
+         
                 return company; 
         }
        catch(Exception e){
@@ -187,34 +293,69 @@ public class CompanyController {
            response.status(400);
            return "Error with data input!";
        }*/
-
+        finally{
+            if(con != null){
+                con.disconnect();
+            }
+        }
     }
     public static Object updateCompany(Request request, Response response, CompaniesEditor compEdit) throws Exception{
         int id = Integer.valueOf(request.params("id"));
-        Company company = fromJson(request.body(), Company.class);
-        System.out.println(company);
-        System.out.println(company.getName());
+        //Company company = fromJson(request.body(), Company.class);
+       // System.out.println(company);
+       // System.out.println(company.getName());
+       Company company = null;
+       HttpURLConnection con = null;
         try{
             if(isEmpty(request.body())){
                 response.status(400);
                 throw new Exception("400. Empty body");
             }
+            
+            else{
+                 if(compEdit.get(id) == null){
+                        response.status(404);
+                       throw new Exception("404. There is no company with id: " + id + "!");
+                 }
+                company = new Company();
+                FinalJson jsonTemp = fromJson(request.body(), FinalJson.class);
+                company.setCity(jsonTemp.city);
+                company.setName(jsonTemp.name);
+                company.setPhoneNumber(jsonTemp.phoneNumber); 
+                company.setOwnerId(id);
+                response.header("PATH", "companies/" + company.getId());
+                compEdit.update(id, company);
+                String url = "http://192.168.99.100:5002/people/" + company.getOwnerId();
+                System.out.println(company.getOwnerId());
+		URL obj = new URL(url);
+		con = (HttpURLConnection) obj.openConnection();
+		con.setRequestMethod("PUT");
+		String requestString = " { \"name\": " + "\""+jsonTemp.ownerName +"\""+  ", ";
+                requestString += "\"surname\": " + "\"" +jsonTemp.ownerSurname+ "\"" + ", "; 
+                requestString += "\"gender\": " + "\"" + jsonTemp.ownerGender + "\"" +", ";
+                requestString += "\"address\": " + "\""+ jsonTemp.ownerAddress +"\""+ "}";
+                  con.setDoOutput(true);
+		DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+		wr.writeBytes(requestString);
+		wr.flush();
+		wr.close();
+            //int responseCode = con.getResponseCode();
+            BufferedReader in = new BufferedReader(
+		        new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer response2 = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {
+			response2.append(inputLine);
+		}
+		in.close();
+                
+                return "Company with ID: " + id + "  successfully updated!";  
+            }
         } catch(Exception e){
             return e.getMessage();
         }
-        try{ 
-            if(compEdit.get(id) != null){
-                compEdit.update(id, company);
-                 return "Company with ID: " + id + "  successfully updated!";  
-            }
-            else{
-                response.status(404);
-                throw new Exception("404. There is no company with id: " + id + "!");
-            }    
-        }
-        catch(Exception e){
-            return e.getMessage();
-        }
+        
     } 
      public static Object patchCompany(Request request, Response response, CompaniesEditor compEdit) throws Exception{
         int id = Integer.valueOf(request.params("id"));
@@ -275,4 +416,20 @@ public class CompanyController {
      public static boolean isAlpha(String name) {
          return name.matches("[a-zA-Z]+");
     }   
+        static class  Adr{
+         public  String ownerName;
+         public String ownerGender;
+         public String ownerAddress;
+         
+}
+     static class FinalJson{
+        int id;
+        String name;
+        String city;
+        int phoneNumber;
+        String ownerName;
+        String ownerSurname;
+        String ownerGender;
+        String ownerAddress;
+     }
 }

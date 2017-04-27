@@ -20,23 +20,21 @@ import java.util.stream.Collectors;
 public class CompaniesEditor {
    public Map<Integer, Company> companies = new HashMap();
    Map<Integer, Company> treeMap;
-   public static int total = 6;
+   public static int total = 5;
 
     
     public CompaniesEditor(){
-        Company temp = new Company(1,"Maxima", "Vilnius", 86511234);
+        Company temp = new Company(1,"Maxima", "Vilnius", 86511234,1);
         companies.put(1,temp);
-        temp = new Company(2,"LemonGym", "Vilnius", 11111111);
+        temp = new Company(2,"LemonGym", "Vilnius", 11111111,2);
         companies.put(2,temp);
-        temp = new Company(3,"Urmas", "Kaunas", 86515150);
+        temp = new Company(3,"Urmas", "Kaunas", 86515150,3);
         companies.put(3,temp);
-        temp = new Company(4,"Lifosa", "Kedainiai", 94646434);
+        temp = new Company(4,"Lifosa", "Kedainiai", 94646434,4);
         companies.put(4,temp);
-        temp = new Company(5,"Maxima", "Kedainiai", 9686868);
+        temp = new Company(5,"Maxima", "Kedainiai", 9686868,5);
         companies.put(5,temp);
-        temp = new Company(6,"Maxima", "Balbieriskis", 94646768);
-        companies.put(6,temp);
-        //System.out.println(toJson(companies));
+
     }
     public String toJson(Map<Integer,Company> companies){
         Gson gson = new Gson();
@@ -54,8 +52,10 @@ public class CompaniesEditor {
         this.companies.remove(id);
     }
     public void create(Company company){
-        
+      
+       
        total++;
+       company.setOwnerId(total);
        company.setId(total);
        this.companies.put(total, company);
     }

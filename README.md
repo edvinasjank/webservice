@@ -1,4 +1,24 @@
-# How to run:
+
+
+# TASK 2
+
+## How to run both services:
+    Download docker-compose.yml and run:   docker-compose up -d
+    
+**POST example:**
+```
+{	
+    "name": "MIF",
+    "city": "Vilnius",
+    "phoneNumber": 86515150,
+    "ownerName": "Dalia",
+    "ownerSurname": "Grybauskaite",
+    "ownerGender": "female",
+    "ownerAddress": "Didlaukio 65"
+}
+```
+
+# TASK 1  
 
 ## Run from hub.docker.com:
     docker run -d -p 80:80 zenka/webservice:1
