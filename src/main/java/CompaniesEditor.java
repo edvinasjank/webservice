@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class CompaniesEditor {
    public Map<Integer, Company> companies = new HashMap();
    Map<Integer, Company> treeMap;
+   public static int total = 6;
 
     
     public CompaniesEditor(){
@@ -52,9 +53,11 @@ public class CompaniesEditor {
     public void delete(int id){
         this.companies.remove(id);
     }
-    public void create(Company company, int id){
-        company.setId(id);
-       this.companies.put(id, company);
+    public void create(Company company){
+        
+       total++;
+       company.setId(total);
+       this.companies.put(total, company);
     }
     public void update(int id, Company company){
         company.setId(id);

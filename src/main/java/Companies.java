@@ -40,7 +40,7 @@ public class Companies {
             delete("/:id", (request, response) -> {
                     return toJson(CompanyController.deleteById(request, response, compEdit));
                 } );
-            post("/:id", (request, response) -> {
+            post("", (request, response) -> {
                     return toJson(CompanyController.createCompany(request, response, compEdit));
                 } );
             put("/:id", (request, response) -> {

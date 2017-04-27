@@ -125,17 +125,11 @@ public class CompanyController {
     }
      public static Object createCompany(Request request, Response response, CompaniesEditor compEdit) {
         System.out.println( request.body());
-        int id = Integer.valueOf(request.params("id"));
-        try{     
+       // int id = Integer.valueOf(request.params("id"));
+             
         int numberCount = 0;
        
-           if(compEdit.companies.containsKey(id)){
-                 response.status(400);
-                throw new Exception("The company already exist with id: " + id + "!");
-            }
-       }catch(Exception e){
-            return e.getMessage();
-        }
+          
         try{
             String temp = request.body();
             if("".equals(temp)){
@@ -143,7 +137,9 @@ public class CompanyController {
                 throw new Exception("400. Invalid input");
             }
         Company company = fromJson(request.body(), Company.class);
-        compEdit.create(company,id);
+      
+        compEdit.create(company);
+          response.header("PATH", "companies/" + company.getId());
                 return company; 
         }
        catch(Exception e){
@@ -229,7 +225,7 @@ public class CompanyController {
             throw new Exception("400. Empty body");
         }
             if(compEdit.get(id) != null){
-                 if(company.getName() == null || company.getCity() == null || company.getPhoneNumber() == 0){
+                 if(company.getName() == null && company.getCity() == null && company.getPhoneNumber() == 0){
                      response.status(400); 
                      throw new Exception("There is no required field in ur json");
                   }
@@ -242,10 +238,8 @@ public class CompanyController {
                   if(company.getPhoneNumber() == 0){
                     company.setPhoneNumber(compEdit.get(id).getPhoneNumber());
                 }
-                 
-                  else{
-                       compEdit.update(id, company);
-                  }
+                compEdit.update(id, company);
+                  
                 
                  return "Company with ID: " + id + "  successfully updated!";  
             }
@@ -255,7 +249,10 @@ public class CompanyController {
             }    
         }
         catch(Exception e){
-          
+            if(response.status() == 404){
+                return e.getMessage();
+            }
+            response.status(400);
             return e.getMessage();
         }
     } 
