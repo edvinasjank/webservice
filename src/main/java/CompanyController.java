@@ -37,7 +37,7 @@ public class CompanyController {
              FinalJson json = new FinalJson();
                   String otherService = "";
                   int ownerId = company.getOwnerId();
-       String url = "http://192.168.99.100:5002/people/" + ownerId ;
+       String url = "http://owner:4321/people/" + ownerId ;
 		URL obj = new URL(url);
 		con = (HttpURLConnection) obj.openConnection();
 		con.setRequestMethod("GET");
@@ -161,7 +161,7 @@ public class CompanyController {
                  
                 int ownerId = company.getOwnerId();
                 try {
-                   obj = new URL("http://192.168.99.100:5002/people/"  + ownerId);  
+                   obj = new URL("http://owner:4321/people/"  + ownerId);  
                   } catch (MalformedURLException exception) {
                        exception.printStackTrace();
                   }              
@@ -215,7 +215,7 @@ public class CompanyController {
                 response.header("PATH", "companies/" + company.getId());
                 compEdit.create(company);
                 System.out.println("Haasas");
-                String url = "http://192.168.99.100:5002/people" ;
+                String url = "http://owner:4321/people" ;
 		URL obj = new URL(url);
 		con = (HttpURLConnection) obj.openConnection();
 		con.setRequestMethod("POST");
@@ -325,7 +325,7 @@ public class CompanyController {
                 company.setOwnerId(id);
                 response.header("PATH", "companies/" + company.getId());
                 compEdit.update(id, company);
-                String url = "http://192.168.99.100:5002/people/" + company.getOwnerId();
+                String url = "http://owner:4321/people/" + company.getOwnerId();
                 System.out.println(company.getOwnerId());
 		URL obj = new URL(url);
 		con = (HttpURLConnection) obj.openConnection();
