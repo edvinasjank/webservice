@@ -36,10 +36,11 @@ public class CompanyController {
            if(company != null){
              FinalJson json = new FinalJson();
                   String otherService = "";
-                  int ownerId = company.getOwnerId();
-       String url = "http://owner:4321/people/" + ownerId ;
+                try{  
+       String url = "http://owner:4321/people/" + id ;
 		URL obj = new URL(url);
 		con = (HttpURLConnection) obj.openConnection();
+                
 		con.setRequestMethod("GET");
 		BufferedReader in = new BufferedReader(
 		        new InputStreamReader(con.getInputStream()));
@@ -57,16 +58,21 @@ public class CompanyController {
         String ownerSurname =  jsonObject.get("surname").getAsString();
         String ownerGender = jsonObject.get("gender").getAsString();
         String ownerAddress = jsonObject.get("address").getAsString();
-        json.id = company.getId();
-       json.city = company.getCity();
-       json.name = company.getName();
-       json.ownerAddress = ownerAddress;
+        json.ownerAddress = ownerAddress;
        json.ownerGender = ownerGender;
        json.ownerName = ownerName ;
        json.ownerSurname =  ownerSurname;
+       json.id = company.getId();
+       json.city = company.getCity();
+       json.name = company.getName();
        json.phoneNumber = company.getPhoneNumber();
         
                return json;
+                }
+                catch(Exception e){
+                  return company;
+                }
+        
            }
            else{
               response.status(404);
@@ -160,11 +166,9 @@ public class CompanyController {
             if(company != null){
                  
                 int ownerId = company.getOwnerId();
-                try {
+           try {
                    obj = new URL("http://owner:4321/people/"  + ownerId);  
-                  } catch (MalformedURLException exception) {
-                       exception.printStackTrace();
-                  }              
+                             
                 System.out.println("33333");
                 
                 con = (HttpURLConnection) obj.openConnection();
@@ -181,11 +185,16 @@ public class CompanyController {
                 compEdit.delete(id);
                 System.out.println("55555");
                  return "Company with ID: " + id + "  successfully deleted!";  
+            } catch (Exception exception) {
+                compEdit.delete(id);
+                return "Company with ID: " + id + "  successfully deleted from company service!";
+            }  
             }
             else{
                 response.status(404);
                 throw new Exception("404. There is no company with id: " + id + "!");
-            }    
+            } 
+            
         }
         catch(Exception e){
             return e.getMessage();
@@ -215,6 +224,7 @@ public class CompanyController {
                 response.header("PATH", "companies/" + company.getId());
                 compEdit.create(company);
                 System.out.println("Haasas");
+                try{
                 String url = "http://owner:4321/people" ;
 		URL obj = new URL(url);
 		con = (HttpURLConnection) obj.openConnection();
@@ -245,13 +255,24 @@ public class CompanyController {
 		
                 System.out.println("hellooo");
                 System.out.println(response2.toString());
-         
                 return company; 
         }
-       catch(Exception e){
-           response.status(400);
-            return e.getMessage();
+                 catch(Exception e){
+            company = new Company();
+                jsonTemp = fromJson(request.body(), FinalJson.class);
+                company.setCity(jsonTemp.city);
+                company.setName(jsonTemp.name);
+                company.setPhoneNumber(jsonTemp.phoneNumber); 
+                response.header("PATH", "companies/" + company.getId());
+                compEdit.create(company);
+                company.setOwnerId(-1);
+            return company;
+                
        }
+        }  catch(Exception e){    
+            response.status(400);
+            return e.getMessage();
+        }
         /*for(int i = 0; i < temp.length(); i++){
             if(temp.charAt(i) == 'p' && temp.charAt(i+1) == 'h' && temp.charAt(i+2) == 'o' && temp.charAt(i+3) == 'n' &&
                     temp.charAt(i+4) == 'e' &&
@@ -329,6 +350,7 @@ public class CompanyController {
                 System.out.println(company.getOwnerId());
 		URL obj = new URL(url);
 		con = (HttpURLConnection) obj.openConnection();
+                //con.
 		con.setRequestMethod("PUT");
 		String requestString = " { \"name\": " + "\""+jsonTemp.ownerName +"\""+  ", ";
                 requestString += "\"surname\": " + "\"" +jsonTemp.ownerSurname+ "\"" + ", "; 

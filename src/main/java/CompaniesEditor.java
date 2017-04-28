@@ -55,6 +55,7 @@ public class CompaniesEditor {
       
        
        total++;
+      
        company.setOwnerId(total);
        company.setId(total);
        this.companies.put(total, company);
