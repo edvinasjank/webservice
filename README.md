@@ -1,5 +1,27 @@
+# TASK 3
 
-
+## How to run both services with authorizacion:
+    1.Go to task3 folder 
+    2.Download docker-compose.yml 
+    3.Run:   docker-compose up -d
+## Registration
+    /register 
+    ```
+    {	
+        "username": "Jonas123",
+        "password": "yourpassword",
+        "permissions": "user/admin"
+    }
+    ```
+## Login
+    /login
+    ```
+    {	
+        "username": "Jonas123",
+        "password": "yourpassword"
+    }
+    ```
+    
 # TASK 2
 
 ## How to run both services:
